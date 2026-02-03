@@ -1,0 +1,40 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js (match Docker & Next.js)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Run ESLint (non-blocking for now)
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      # 5️⃣ Build Next.js app (MOST IMPORTANT)
+      - name: Build Next.js app
+        run: npm run build
+
+      # 6️⃣ Build Docker image (production validation)
+      - name: Build Docker image
+        run: docker build -t ai-interview-trainer .
