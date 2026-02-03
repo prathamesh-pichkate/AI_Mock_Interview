@@ -1,0 +1,7 @@
+1. next js supports the file based routing.
+
+
+
+
+
+
