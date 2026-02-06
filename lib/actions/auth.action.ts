@@ -30,8 +30,19 @@ export async function signUp(params: SignUpParams) {
       success: true,
       message: 'Account created successfully. Please sign in.',
     };
-  } catch (error: any) {
-    console.error('Error creating user:', error);
+  } catch (error: unknown) {
+    console.error('Error while creating the user:', error);
+
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      const code = (error as { code?: string }).code;
+
+      if (code === 'auth/invalid-id-token') {
+        return {
+          success: false,
+          message: 'Invalid session token. Please sign in again.',
+        };
+      }
+    }
 
     return {
       success: false,
@@ -69,23 +80,18 @@ export async function signIn(params: SignInParams) {
       success: true,
       message: 'Signed in successfully.',
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error signing the user:', error);
 
-    const code = error?.code as string | undefined;
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      const code = (error as { code?: string }).code;
 
-    if (code === 'auth/invalid-id-token') {
-      return {
-        success: false,
-        message: 'Invalid session token. Please sign in again.',
-      };
-    }
-
-    if (code === 'auth/user-not-found') {
-      return {
-        success: false,
-        message: 'User not found. Please create an account.',
-      };
+      if (code === 'auth/invalid-id-token') {
+        return {
+          success: false,
+          message: 'Invalid session token. Please sign in again.',
+        };
+      }
     }
 
     return {

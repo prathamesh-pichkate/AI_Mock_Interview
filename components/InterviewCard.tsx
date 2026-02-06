@@ -8,7 +8,6 @@ import { cn, getRandomInterviewCover } from '@/lib/utils';
 
 const InterviewCard = ({
   interviewId,
-  userId,
   role,
   type,
   techstack,
@@ -17,8 +16,10 @@ const InterviewCard = ({
   const feedback = null as Feedback | null;
 
   const normalizedType = /mix/gi.test(type) ? 'Mixed' : type;
+  const FALLBACK_DATE = new Date(0);
+
   const formattedDate = dayjs(
-    feedback?.createdAt || createdAt || Date.now(),
+    feedback?.createdAt ?? createdAt ?? FALLBACK_DATE,
   ).format('MMM D, YYYY');
 
   return (
