@@ -39,7 +39,7 @@ export async function signUp(params: SignUpParams) {
       if (code === 'auth/invalid-id-token') {
         return {
           success: false,
-          message: 'Invalid session token. Please sign in again.',
+          message: 'Invalid session token. Please sign up again.',
         };
       }
     }
