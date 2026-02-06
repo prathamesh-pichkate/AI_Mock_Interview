@@ -3,7 +3,7 @@ import AuthForm from '@/components/AuthForm';
 
 const page = () => {
   return (
-    <div>
+    <div className="flex justify-center items-center min-h-screen">
       <AuthForm type="sign-up" />
     </div>
   );

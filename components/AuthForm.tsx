@@ -12,6 +12,12 @@ import Image from 'next/image';
 import Link from 'next/dist/client/link';
 import FormField from './FormField';
 import { useRouter } from 'next/dist/client/components/navigation';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import { auth } from '@/firebase/client';
+import { signIn, signUp } from '@/lib/actions/auth.action';
 
 const authFormSchema = (type: FormType) => {
   return z.object({
@@ -36,14 +42,47 @@ const AuthForm = ({ type }: { type: FormType }) => {
   });
 
   // 2. Define a submit handler
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       if (type === 'sign-up') {
-        console.log('Signing up user:', data);
+        const { name, email, password } = data;
+
+        const userCredentials = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+
+        const result = await signUp({
+          uid: userCredentials.user.uid,
+          name: name!,
+          email,
+          password,
+        });
+
+        if (!result?.success) {
+          toast.error(result.message);
+          return;
+        }
+
         toast.success('Account created successfully!');
         router.push('/sign-in');
       } else {
-        console.log('Signing in user:', data);
+        const { email, password } = data;
+
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+        const idToken = await userCredential.user.getIdToken();
+
+        if (!idToken) {
+          toast.error('Failed to retrieve session token. Please try again.');
+          return;
+        }
+
+        await signIn({ email, idToken });
         toast.success('Signed in successfully!');
         router.push('/');
       }
@@ -60,7 +99,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
           <Image src="./logo.svg" alt="logo" width={38} height={32} />
           <h2 className="text-primary-100">AI-Interview</h2>
         </div>
-        <h3>Practice your interview skills with AI</h3>
+        <h3 className="text-center">Practice your interview skills with AI</h3>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

@@ -332,3 +332,7 @@
     transform: translateY(0);
   }
 }
+
+.interview-section {
+  @apply flex flex-wrap gap-6;
+}
