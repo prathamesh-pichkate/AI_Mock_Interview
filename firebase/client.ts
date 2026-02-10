@@ -4,13 +4,13 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCQfD1CD_To_8IzWfbHkShCJyW7DwVQuHY',
-  authDomain: 'aiinterview-7cdc3.firebaseapp.com',
-  projectId: 'aiinterview-7cdc3',
-  storageBucket: 'aiinterview-7cdc3.firebasestorage.app',
-  messagingSenderId: '194544711183',
-  appId: '1:194544711183:web:eca5899d2f9e04350a557a',
-  measurementId: 'G-7LXTBVB2ZV',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
