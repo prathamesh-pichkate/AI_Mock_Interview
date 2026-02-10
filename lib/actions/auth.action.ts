@@ -1,6 +1,6 @@
 'use server';
 
-import { db, auth } from '@/firebase/admin';
+import { getFirebaseAdmin } from '@/firebase/admin';
 import { cookies } from 'next/headers';
 
 // Session duration (1 week)
@@ -9,6 +9,7 @@ const SESSION_DURATION = 60 * 60 * 24 * 7;
 // sign-up the user
 export async function signUp(params: SignUpParams) {
   const { uid, name, email } = params;
+  const { db } = getFirebaseAdmin();
 
   try {
     const userDoc = await db.collection('users').doc(uid).get();
@@ -33,17 +34,6 @@ export async function signUp(params: SignUpParams) {
   } catch (error: unknown) {
     console.error('Error while creating the user:', error);
 
-    if (typeof error === 'object' && error !== null && 'code' in error) {
-      const code = (error as { code?: string }).code;
-
-      if (code === 'auth/invalid-id-token') {
-        return {
-          success: false,
-          message: 'Invalid session token. Please sign up again.',
-        };
-      }
-    }
-
     return {
       success: false,
       message: 'Failed to create account. Please try again.',
@@ -54,6 +44,7 @@ export async function signUp(params: SignUpParams) {
 // sign-in the user
 export async function signIn(params: SignInParams) {
   const { email, idToken } = params;
+  const { auth, db } = getFirebaseAdmin();
 
   try {
     const decoded = await auth.verifyIdToken(idToken);
@@ -83,17 +74,6 @@ export async function signIn(params: SignInParams) {
   } catch (error: unknown) {
     console.error('Error signing the user:', error);
 
-    if (typeof error === 'object' && error !== null && 'code' in error) {
-      const code = (error as { code?: string }).code;
-
-      if (code === 'auth/invalid-id-token') {
-        return {
-          success: false,
-          message: 'Invalid session token. Please sign in again.',
-        };
-      }
-    }
-
     return {
       success: false,
       message: 'Failed to sign in to account. Please try again.',
@@ -103,6 +83,7 @@ export async function signIn(params: SignInParams) {
 
 // Set session cookie
 export async function setSessionCookie(idToken: string) {
+  const { auth } = getFirebaseAdmin();
   const cookieStore = await cookies();
 
   const sessionCookie = await auth.createSessionCookie(idToken, {
@@ -119,6 +100,7 @@ export async function setSessionCookie(idToken: string) {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
+  const { auth, db } = getFirebaseAdmin();
   const cookieStore = await cookies();
 
   const sessionCookie = cookieStore.get('session')?.value;
@@ -127,21 +109,15 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
 
-    // get user info from db
-    const userRecord = await db
-      .collection('users')
-      .doc(decodedClaims.uid)
-      .get();
-    if (!userRecord.exists) return null;
+    const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
+
+    if (!userDoc.exists) return null;
 
     return {
-      ...userRecord.data(),
-      id: userRecord.id,
+      ...userDoc.data(),
+      id: userDoc.id,
     } as User;
-  } catch (error) {
-    console.log(error);
-
-    // Invalid or expired session
+  } catch {
     return null;
   }
 }

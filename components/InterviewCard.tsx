@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import dayjs from 'dayjs';
 import Link from 'next/link';
